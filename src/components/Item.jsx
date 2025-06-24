@@ -1,17 +1,18 @@
-import React from "react";
+import React from 'react';
 
-//Este componente muestra una lista de ítems.
-
-//Por cada ítem se renderiza un componente Item, pasándole las funciones de eliminar y editar.
-
-function Item({item, deleteItem, editItem}){
-    return(
-        <li>
-            {item.value}
-            <button onClick={()=> editItem(item)}>Editar</button>
-            <button onClick={()=> deleteItem(item.id)}>Eliminar</button>
-        </li>
-    );
-};
+function Item({ student, deleteStudent, editStudent }) {
+  // Renderiza un estudiante con su nombre, asignatura, promedio y escala
+  return (
+    <li>
+    <strong>Alumno: {student.nombre}</strong>
+    Asignatura: {student.asignatura}<br />
+    Promedio: {student.promedio}<br />
+    <span className="badge">{student.escala}</span>
+    <br />
+    <button onClick={() => editStudent(student)}>Editar</button>
+    <button onClick={() => deleteStudent(student.id)}>Eliminar</button>
+    </li>
+  );
+}
 
 export default Item;

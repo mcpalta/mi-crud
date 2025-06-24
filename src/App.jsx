@@ -4,61 +4,98 @@ import List from './components/List';
 import './App.css';
 
 function App() {
-  // Estado que guarda los elementos (ítems) del CRUD
-  const [items, setItems] = useState([]);
+  // Estado que contiene la lista completa de estudiantes guardados
+  const [students, setStudents] = useState([]);
 
-  // Estado para guardar el ítem que se desea editar
-  const [itemToEdit, setItemToEdit] = useState(null);
+  // Estado que contiene el estudiante seleccionado para edición
+  const [studentToEdit, setStudentToEdit] = useState(null);
 
-  // Al cargar la app, recupera los datos guardados en localStorage
+  // Al iniciar, cargamos los estudiantes almacenados en localStorage (si hay)
   useEffect(() => {
-    const storedItems = JSON.parse(localStorage.getItem('items')) || [];
-    setItems(storedItems);
-  }, []);
-
-  // Cada vez que cambian los ítems, actualiza el localStorage
-  useEffect(() => {
-    localStorage.setItem('items', JSON.stringify(items));
-  }, [items]);
-
-  // Función para agregar o actualizar un ítem
-  const addOrUpdateItem = (value) => {
-    if (itemToEdit) {
-      // Si se está editando, actualiza el ítem correspondiente
-      setItems(items.map(item => item.id === itemToEdit.id ? { ...item, value } : item));
-      setItemToEdit(null); // Limpia el ítem en edición
+  try {
+    const data = localStorage.getItem('students');
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        setStudents(parsed);
+      } else {
+        console.warn('El contenido de localStorage no es un arreglo:', parsed);
+        setStudents([]);
+      }
     } else {
-      // Si no, agrega un nuevo ítem con un id único
-      setItems([...items, { id: Date.now(), value }]);
+      console.log('No hay datos previos en localStorage.');
+      setStudents([]);
+    }
+  } catch (error) {
+    console.error('Error al cargar datos desde localStorage:', error);
+    setStudents([]);
+  }
+}, []);
+
+  // Cada vez que cambia la lista de estudiantes, la guardamos en localStorage
+  useEffect(() => {
+    localStorage.setItem('students', JSON.stringify(students));
+  }, [students]);
+
+  // Función que evalúa el promedio y devuelve la escala de apreciación correspondiente
+  const calcularEscala = (promedio) => {
+    if (promedio < 4) return 'Deficiente';
+    if (promedio <= 5.5) return 'Con mejora';
+    if (promedio <= 6.4) return 'Buen trabajo';
+    return 'Destacado';
+  };
+
+  // Agrega un nuevo estudiante o actualiza uno existente
+  const addOrUpdateStudent = (student) => {
+    const escala = calcularEscala(student.promedio);
+    const studentData = { ...student, escala };
+
+    if (studentToEdit) {
+      // Si hay un estudiante en edición, lo actualizamos en la lista
+      setStudents(
+        students.map((s) =>
+          s.id === studentToEdit.id ? { ...studentData, id: s.id } : s
+        )
+      );
+      setStudentToEdit(null);
+    } else {
+      // Si no, agregamos uno nuevo con un id único
+      setStudents([...students, { ...studentData, id: Date.now() }]);
     }
   };
 
-  // Función para eliminar un ítem por su id
-  const deleteItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+  // Elimina un estudiante de la lista por su ID
+  const deleteStudent = (id) => {
+    setStudents(students.filter((s) => s.id !== id));
   };
 
-  // Función para seleccionar un ítem para editar
-  const editItem = (item) => {
-    setItemToEdit(item);
+  // Carga los datos del estudiante para edición
+  const editStudent = (student) => {
+    setStudentToEdit(student);
   };
 
-  // Renderizado principal
+  // Render de la aplicación
   return (
     <div className="App">
-      <h1>CRUD con LocalStorage</h1>
-      <Form
-        addOrUpdateItem={addOrUpdateItem}
-        itemToEdit={itemToEdit}
-      />
-      <List
-        items={items}
-        deleteItem={deleteItem}
-        editItem={editItem}
-      />
+      <h1>Evaluación de Alumnos</h1>
+
+      {/* Subtítulo que cambia dinámicamente si se está agregando o editando */}
+      <h2>{studentToEdit ? 'Editar Evaluación' : 'Agregar Nueva Evaluación'}</h2>
+
+      {/* Formulario para ingresar o modificar datos de un estudiante */}
+      <Form addOrUpdateStudent={addOrUpdateStudent} studentToEdit={studentToEdit} />
+
+      {/* Subtítulo de la lista de estudiantes */}
+      <h2>Evaluaciones Guardadas</h2>
+
+      {/* Lista de estudiantes, o mensaje si aún no hay datos */}
+      {students.length > 0 ? (
+        <List students={students} deleteStudent={deleteStudent} editStudent={editStudent} />
+      ) : (
+        <p>No hay evaluaciones guardadas aún. ¡Agrega una!</p>
+      )}
     </div>
   );
 }
 
 export default App;
-
