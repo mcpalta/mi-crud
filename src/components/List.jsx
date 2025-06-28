@@ -1,4 +1,4 @@
-import React from 'react';
+import react from 'react';
 import Item from './Item';
 
 function List({ students, deleteStudent, editStudent }) {

@@ -1,4 +1,4 @@
-import React from 'react';
+import react from 'react';
 
 function Item({ student, deleteStudent, editStudent }) {
   // Renderiza un estudiante con su nombre, asignatura, promedio y escala
