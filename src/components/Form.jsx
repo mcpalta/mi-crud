@@ -1,4 +1,4 @@
-import react, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 function Form({ addOrUpdateStudent, studentToEdit }) {
   // Estados individuales para cada campo del formulario

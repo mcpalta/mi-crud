@@ -1,4 +1,4 @@
-import react, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Form from './components/Form';
 import List from './components/List';
 import './App.css';
@@ -10,32 +10,36 @@ function App() {
   // Estado que contiene el estudiante seleccionado para edición
   const [studentToEdit, setStudentToEdit] = useState(null);
 
+  const [isInitialized, setIsInitialized] = useState(false); // 🆕 Control de carga inicial
+  
   // Al iniciar, cargamos los estudiantes almacenados en localStorage (si hay)
   useEffect(() => {
-  try {
-    const data = localStorage.getItem('students');
-    if (data) {
-      const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
-        setStudents(parsed);
+    try {
+      const data = localStorage.getItem('students');
+      console.log("🔥 Al cargar la app, localStorage tiene:", data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) {
+          setStudents(parsed);
+        } else {
+          console.warn('El contenido de localStorage no es un arreglo:', parsed);
+        }
       } else {
-        console.warn('El contenido de localStorage no es un arreglo:', parsed);
-        setStudents([]);
+        console.log('No hay datos previos en localStorage.');
       }
-    } else {
-      console.log('No hay datos previos en localStorage.');
-      setStudents([]);
+    } catch (error) {
+      console.error('Error al cargar datos desde localStorage:', error);
     }
-  } catch (error) {
-    console.error('Error al cargar datos desde localStorage:', error);
-    setStudents([]);
-  }
-}, []);
+    setIsInitialized(true); // 🆕 Marcamos que ya cargamos
+  }, []);
 
-  // Cada vez que cambia la lista de estudiantes, la guardamos en localStorage
+  // Guardar en localStorage solo después de la carga inicial
   useEffect(() => {
-    localStorage.setItem('students', JSON.stringify(students));
-  }, [students]);
+    if (isInitialized) {
+      console.log("💾 Guardando en localStorage:", students);
+      localStorage.setItem('students', JSON.stringify(students));
+    }
+  }, [students, isInitialized]);
 
   // Función que evalúa el promedio y devuelve la escala de apreciación correspondiente
   const calcularEscala = (promedio) => {
